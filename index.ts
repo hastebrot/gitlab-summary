@@ -7,7 +7,7 @@ import { DateTime } from "luxon"
 
 if (require.main === module) {
   const config = require("./build/config.json")
-  const cli = meow(`
+  const help = `
     Usage
       $ lab <command> [project name]
 
@@ -15,10 +15,19 @@ if (require.main === module) {
       $ lab projects
       $ lab projects foo
       $ lab reviews foo
-`, {})
+      $ lab reviews foo --files
+  `
+
+  const cli = meow(help, {
+    flags: {
+      files: {
+        type: "boolean"
+      }
+    }
+  })
 
   if (cli.input.length === 0) {
-    cli.showHelp()
+    cli.showHelp(0)
   }
   else {
     console.log(chalk.green("*** " + (cli.pkg as any).name + " ***"))
@@ -28,7 +37,7 @@ if (require.main === module) {
       fetchProjectList(config, cli.input[1])
     }
     else if (cli.input[0] === "reviews") {
-      fetchMergeRequestList(config, cli.input[1])
+      fetchMergeRequestList(config, cli.input[1], cli.flags.files)
     }
   }
 }
@@ -45,7 +54,7 @@ export function fetchProjectList(config: any, projectName: string) {
     const projects: any[] = JSON.parse(response.body)
     projects.forEach(project => {
       console.log([
-        chalk.underline(project.id), chalk.redBright(project.name),
+        chalk.underline(project.id), chalk.red(project.name),
         project.path_with_namespace
       ].join(" "))
     })
@@ -53,7 +62,8 @@ export function fetchProjectList(config: any, projectName: string) {
   })
 }
 
-export function fetchMergeRequestList(config: any, projectName: string) {
+export function fetchMergeRequestList(config: any, projectName: string,
+    showFiles: boolean = false) {
   const extensionsGlob = "**/*.{java,js,html,gradle}"
 
   run(async () => {
@@ -66,8 +76,8 @@ export function fetchMergeRequestList(config: any, projectName: string) {
     if (projects.length > 0) {
       const project = projects[0]
       console.log([
-        chalk.underline(project.id), chalk.redBright(project.name),
-        project.path_with_namespace, chalk.yellowBright(extensionsGlob)
+        chalk.underline(project.id), chalk.red(project.name),
+        project.path_with_namespace, chalk.yellow(extensionsGlob)
       ].join(" "))
       console.log("")
 
@@ -99,7 +109,19 @@ export function fetchMergeRequestList(config: any, projectName: string) {
               id: mergeRequest.iid,
               title: mergeRequest.title,
               author: mergeRequest.author.username,
-              files: mergeRequest.changes.map((it: any) => it.new_path),
+              files: mergeRequest.changes.map((it: any) => {
+                const ADDED = chalk.green("(+)")
+                const REMOVED = chalk.red("(-)")
+                const MODIFIED = chalk.yellow("(~)")
+                let status = MODIFIED
+                if (it.renamed_file) { status = MODIFIED }
+                if (it.new_file) { status = ADDED }
+                if (it.deleted_file) { status = REMOVED }
+                return {
+                  path: it.new_path,
+                  status
+                }
+              }),
               created: DateTime.fromISO(mergeRequest.created_at),
               updated: DateTime.fromISO(mergeRequest.updated_at)
             })
@@ -125,10 +147,17 @@ export function fetchMergeRequestList(config: any, projectName: string) {
               result.author, `[${result.files.length}]`, chalk.yellow(updatedDiffStr)
             ].join(" "))
             console.log("")
-            micromatch(result.files, extensionsGlob).forEach(path => {
-              console.log(`${chalk.dim("-")} ${chalk.dim(path)}`)
-            })
-            console.log("")
+
+            if (showFiles) {
+              result.files
+                .filter((file: any) =>
+                  micromatch.isMatch(file.path, extensionsGlob)
+                )
+                .forEach((file: any) => {
+                  console.log(`${chalk.dim(file.status)} ${chalk.dim(file.path)}`)
+                })
+              console.log("")
+            }
           })
         })
       })
