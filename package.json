@@ -4,5 +4,11 @@
   "main": "index.js",
   "repository": "https://github.com/hastebrot/gitlab-summary",
   "author": "Benjamin Gudehus <hastebrot@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@types/d3-queue": "^3.0.5",
+    "@types/got": "^7.1.7",
+    "d3-queue": "^3.0.7",
+    "got": "^8.1.0"
+  }
 }
