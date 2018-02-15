@@ -1,6 +1,7 @@
 import got from "got"
 import meow from "meow"
 import chalk from "chalk"
+import micromatch from "micromatch"
 import { queue } from "d3-queue"
 import { DateTime } from "luxon"
 
@@ -78,9 +79,14 @@ export function fetchMergeRequestList(config: any) {
         const updated = DateTime.fromISO(result.updated)
           .toFormat("HH 'hours,' mm 'minutes ago'")
         console.log([
-          result.id, chalk.redBright(result.title),
+          chalk.underline(result.id), chalk.redBright(result.title),
           result.author, `[${result.files.length}]`, chalk.yellow(updated)
         ].join(" "))
+        console.log("")
+        micromatch(result.files, "**/*.java").forEach(path => {
+          console.log(`${chalk.dim("-")} ${chalk.dim(path)}`)
+        })
+        console.log("")
       })
     })
   })

@@ -11,12 +11,14 @@
     "@types/got": "^7.1.7",
     "@types/luxon": "^0.2.5",
     "@types/meow": "^4.0.0",
+    "@types/micromatch": "^3.1.0",
     "@types/ramda": "^0.25.18",
     "chalk": "^2.3.1",
     "d3-queue": "^3.0.7",
     "got": "^8.1.0",
     "luxon": "^0.4.0",
     "meow": "^4.0.0",
+    "micromatch": "^3.1.5",
     "ramda": "^0.25.0"
   },
   "devDependencies": {
