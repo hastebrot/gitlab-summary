@@ -4,5 +4,9 @@
   "main": "index.js",
   "repository": "https://github.com/hastebrot/gitlab-summary",
   "author": "Benjamin Gudehus <hastebrot@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@types/got": "^7.1.7",
+    "got": "^8.1.0"
+  }
 }
