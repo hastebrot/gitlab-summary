@@ -13,16 +13,19 @@ if (require.main === module) {
   console.log("")
 
   if (cli.input[0] === "projects") {
-    fetchProjectList(config)
+    fetchProjectList(config, cli.input[1])
   }
   else if (cli.input[0] === "reviews") {
-    fetchMergeRequestList(config)
+    fetchMergeRequestList(config, cli.input[1])
   }
 }
 
-export function fetchProjectList(config: any) {
+export function fetchProjectList(config: any, projectName: string) {
   run(async () => {
-    const path = pathsProjects()
+    let path = pathsProjects()
+    if (projectName) {
+      path = pathsProject(projectName)
+    }
     const response = await request(config, path)
     // console.log(response.statusCode, response.statusMessage)
 
@@ -36,9 +39,9 @@ export function fetchProjectList(config: any) {
   })
 }
 
-export function fetchMergeRequestList(config: any) {
+export function fetchMergeRequestList(config: any, projectName: string) {
   run(async () => {
-    const path = pathsProject(config.gitlab.project)
+    const path = pathsProject(projectName || config.gitlab.project)
     const response = await request(config, path)
     // console.log(response.statusCode, response.statusMessage)
 
@@ -116,7 +119,6 @@ export function fetchMergeRequestList(config: any) {
 
     }
   })
-
 }
 
 function pathsProjects(): string {
