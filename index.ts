@@ -2,12 +2,13 @@ import got from "got"
 import meow from "meow"
 import chalk from "chalk"
 import { queue } from "d3-queue"
+import { DateTime } from "luxon"
 
 if (require.main === module) {
   const config = require("./build/config.json")
   const cli = meow({})
 
-  console.log(chalk.green((cli.pkg as any).name) + "\n")
+  console.log(chalk.green("*** " + (cli.pkg as any).name + " ***") + "\n")
 
   if (cli.input[0] === "projects") {
     fetchProjectList(config)
@@ -18,21 +19,6 @@ if (require.main === module) {
   else {
     fetchMergeRequestList(config)
   }
-}
-
-export function pathsProjects(): string {
-  return "/v4/projects?per_page=100"
-}
-
-export function pathsMergeRequests(projectId: string): string {
-  return "/v4/projects/" + projectId + "/merge_requests"
-    + "?state=opened&per_page=100"
-}
-
-export function pathsMergeRequest(projectId: string,
-                                  mergeRequestId: string): string {
-  return "/v4/projects/" + projectId + "/merge_requests/"
-    + mergeRequestId + "/changes?per_page=100"
 }
 
 export function fetchProjectList(config: any) {
@@ -79,8 +65,9 @@ export function fetchMergeRequestList(config: any) {
           id: mergeRequest.iid,
           title: mergeRequest.title,
           author: mergeRequest.author.username,
-          files: mergeRequest.changes.map((it: any) => it.new_path).length,
-          update: mergeRequest.updated_at
+          files: mergeRequest.changes.map((it: any) => it.new_path),
+          created: mergeRequest.created_at,
+          updated: mergeRequest.updated_at
         })
         done(null)
       })
@@ -88,13 +75,30 @@ export function fetchMergeRequestList(config: any) {
 
     q.await(() => {
       results.forEach((result: any) => {
+        const updated = DateTime.fromISO(result.updated)
+          .toFormat("HH 'hours,' mm 'minutes ago'")
         console.log([
           result.id, chalk.redBright(result.title),
-          result.author, result.files, result.update
+          result.author, `[${result.files.length}]`, chalk.yellow(updated)
         ].join(" "))
       })
     })
   })
+}
+
+function pathsProjects(): string {
+  return "/v4/projects?per_page=100"
+}
+
+function pathsMergeRequests(projectId: string): string {
+  return "/v4/projects/" + projectId + "/merge_requests"
+    + "?state=opened&per_page=100"
+}
+
+function pathsMergeRequest(projectId: string,
+                                  mergeRequestId: string): string {
+  return "/v4/projects/" + projectId + "/merge_requests/"
+    + mergeRequestId + "/changes?per_page=100"
 }
 
 function run(action: () => void) {
