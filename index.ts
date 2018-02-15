@@ -17,9 +17,6 @@ if (require.main === module) {
   else if (cli.input[0] === "reviews") {
     fetchMergeRequestList(config)
   }
-  else {
-    fetchMergeRequestList(config)
-  }
 }
 
 export function fetchProjectList(config: any) {
@@ -67,20 +64,29 @@ export function fetchMergeRequestList(config: any) {
           title: mergeRequest.title,
           author: mergeRequest.author.username,
           files: mergeRequest.changes.map((it: any) => it.new_path),
-          created: mergeRequest.created_at,
-          updated: mergeRequest.updated_at
+          created: DateTime.fromISO(mergeRequest.created_at),
+          updated: DateTime.fromISO(mergeRequest.updated_at)
         })
         done(null)
       })
     })
 
     q.await(() => {
+      const now = DateTime.local()
+
+      results.sort((a: any, b: any) => {
+        return b.updated.valueOf() - a.updated.valueOf()
+      })
+
       results.forEach((result: any) => {
-        const updated = DateTime.fromISO(result.updated)
-          .toFormat("HH 'hours,' mm 'minutes ago'")
+        const updatedDiff = now.diff(result.updated, ["hours", "minutes"])
+          .toObject()
+        const updatedDiffStr = `${updatedDiff.hours} hours, `
+          + `${Math.round(updatedDiff.minutes as number)} mins ago`
+
         console.log([
           chalk.underline(result.id), chalk.redBright(result.title),
-          result.author, `[${result.files.length}]`, chalk.yellow(updated)
+          result.author, `[${result.files.length}]`, chalk.yellow(updatedDiffStr)
         ].join(" "))
         console.log("")
         micromatch(result.files, "**/*.java").forEach(path => {
@@ -98,7 +104,7 @@ function pathsProjects(): string {
 
 function pathsMergeRequests(projectId: string): string {
   return "/v4/projects/" + projectId + "/merge_requests"
-    + "?state=opened&per_page=100"
+    + "?state=opened&per_page=100&order_by=updated_at&sort=desc"
 }
 
 function pathsMergeRequest(projectId: string,
