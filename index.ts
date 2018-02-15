@@ -7,16 +7,29 @@ import { DateTime } from "luxon"
 
 if (require.main === module) {
   const config = require("./build/config.json")
-  const cli = meow({})
+  const cli = meow(`
+    Usage
+      $ lab <command> [project name]
 
-  console.log(chalk.green("*** " + (cli.pkg as any).name + " ***"))
-  console.log("")
+    Examples
+      $ lab projects
+      $ lab projects foo
+      $ lab reviews foo
+`, {})
 
-  if (cli.input[0] === "projects") {
-    fetchProjectList(config, cli.input[1])
+  if (cli.input.length === 0) {
+    cli.showHelp()
   }
-  else if (cli.input[0] === "reviews") {
-    fetchMergeRequestList(config, cli.input[1])
+  else {
+    console.log(chalk.green("*** " + (cli.pkg as any).name + " ***"))
+    console.log("")
+
+    if (cli.input[0] === "projects") {
+      fetchProjectList(config, cli.input[1])
+    }
+    else if (cli.input[0] === "reviews") {
+      fetchMergeRequestList(config, cli.input[1])
+    }
   }
 }
 
@@ -36,6 +49,7 @@ export function fetchProjectList(config: any, projectName: string) {
         project.path_with_namespace
       ].join(" "))
     })
+    console.log("")
   })
 }
 
