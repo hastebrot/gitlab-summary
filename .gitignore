@@ -1,0 +1,12 @@
+# build files.
+build/
+
+# project files.
+.idea/
+.vscode/
+
+# dependencies.
+node_modules/
+
+# apple macos.
+*.DS_Store
