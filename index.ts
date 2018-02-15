@@ -54,6 +54,8 @@ export function fetchProjectList(config: any, projectName: string) {
 }
 
 export function fetchMergeRequestList(config: any, projectName: string) {
+  const extensionsGlob = "**/*.{java,js,html,gradle}"
+
   run(async () => {
     const path = pathsProject(projectName || config.gitlab.project)
     const response = await request(config, path)
@@ -65,7 +67,7 @@ export function fetchMergeRequestList(config: any, projectName: string) {
       const project = projects[0]
       console.log([
         chalk.underline(project.id), chalk.redBright(project.name),
-        project.path_with_namespace
+        project.path_with_namespace, chalk.yellowBright(extensionsGlob)
       ].join(" "))
       console.log("")
 
@@ -123,7 +125,7 @@ export function fetchMergeRequestList(config: any, projectName: string) {
               result.author, `[${result.files.length}]`, chalk.yellow(updatedDiffStr)
             ].join(" "))
             console.log("")
-            micromatch(result.files, "**/*.{java,js,html,gradle}").forEach(path => {
+            micromatch(result.files, extensionsGlob).forEach(path => {
               console.log(`${chalk.dim("-")} ${chalk.dim(path)}`)
             })
             console.log("")
