@@ -1,10 +1,23 @@
 import got from "got"
+import meow from "meow"
+import chalk from "chalk"
 import { queue } from "d3-queue"
 
 if (require.main === module) {
   const config = require("./build/config.json")
-  // fetchProjectList(config)
-  fetchMergeRequestList(config)
+  const cli = meow({})
+
+  console.log(chalk.green((cli.pkg as any).name) + "\n")
+
+  if (cli.input[0] === "projects") {
+    fetchProjectList(config)
+  }
+  else if (cli.input[0] === "reviews") {
+    fetchMergeRequestList(config)
+  }
+  else {
+    fetchMergeRequestList(config)
+  }
 }
 
 export function pathsProjects(): string {
@@ -26,11 +39,13 @@ export function fetchProjectList(config: any) {
   run(async () => {
     const path = pathsProjects()
     const response = await request(config, path)
-    console.log(response.statusCode, response.statusMessage)
+    // console.log(response.statusCode, response.statusMessage)
 
     const projects: any[] = JSON.parse(response.body)
     projects.forEach(project => {
-      console.log(project.id, project.name, project.path_with_namespace, project._links.merge_requests)
+      console.log([
+        project.id, chalk.redBright(project.name), project.path_with_namespace
+      ].join(" "))
     })
   })
 }
@@ -39,13 +54,15 @@ export function fetchMergeRequestList(config: any) {
   run(async () => {
     const path = pathsMergeRequests(config.gitlab.project)
     const response = await request(config, path)
-    console.log(response.statusCode, response.statusMessage)
+    // console.log(response.statusCode, response.statusMessage)
 
     const mergeRequests: any[] = JSON.parse(response.body)
     const ids: string[] = []
     mergeRequests.forEach(mergeRequest => {
-      // console.log(mergeRequest.id, mergeRequest.iid, mergeRequest.title,
-      //   mergeRequest.author.username, mergeRequest.work_in_progress)
+      // console.log([
+      //   mergeRequest.id, mergeRequest.iid, chalk.redBright(mergeRequest.title),
+      //   mergeRequest.author.username, mergeRequest.work_in_progress
+      // ].join(" "))
       ids.push(mergeRequest.iid)
     })
 
@@ -55,7 +72,7 @@ export function fetchMergeRequestList(config: any) {
       q.defer(async done => {
         const path = pathsMergeRequest(config.gitlab.project, id)
         const response = await request(config, path)
-        console.log(response.statusCode, response.statusMessage)
+        // console.log(response.statusCode, response.statusMessage)
 
         const mergeRequest: any = JSON.parse(response.body)
         results.push({
@@ -70,7 +87,12 @@ export function fetchMergeRequestList(config: any) {
     })
 
     q.await(() => {
-      console.log(results)
+      results.forEach((result: any) => {
+        console.log([
+          result.id, chalk.redBright(result.title),
+          result.author, result.files, result.update
+        ].join(" "))
+      })
     })
   })
 }

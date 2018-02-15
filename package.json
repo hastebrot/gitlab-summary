@@ -6,9 +6,22 @@
   "author": "Benjamin Gudehus <hastebrot@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@types/chalk": "^2.2.0",
     "@types/d3-queue": "^3.0.5",
     "@types/got": "^7.1.7",
+    "@types/meow": "^4.0.0",
+    "@types/ramda": "^0.25.18",
+    "chalk": "^2.3.1",
     "d3-queue": "^3.0.7",
-    "got": "^8.1.0"
+    "got": "^8.1.0",
+    "meow": "^4.0.0",
+    "ramda": "^0.25.0"
+  },
+  "devDependencies": {
+    "ts-node": "^4.1.0",
+    "typescript": "^2.7.2"
+  },
+  "scripts": {
+    "start": "./node_modules/.bin/ts-node index.ts"
   }
 }
