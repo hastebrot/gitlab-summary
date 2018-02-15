@@ -89,7 +89,7 @@ export function fetchMergeRequestList(config: any) {
           result.author, `[${result.files.length}]`, chalk.yellow(updatedDiffStr)
         ].join(" "))
         console.log("")
-        micromatch(result.files, "**/*.java").forEach(path => {
+        micromatch(result.files, "**/*.{java,js,html,gradle}").forEach(path => {
           console.log(`${chalk.dim("-")} ${chalk.dim(path)}`)
         })
         console.log("")
@@ -107,8 +107,7 @@ function pathsMergeRequests(projectId: string): string {
     + "?state=opened&per_page=100&order_by=updated_at&sort=desc"
 }
 
-function pathsMergeRequest(projectId: string,
-                                  mergeRequestId: string): string {
+function pathsMergeRequest(projectId: string, mergeRequestId: string): string {
   return "/v4/projects/" + projectId + "/merge_requests/"
     + mergeRequestId + "/changes?per_page=100"
 }
