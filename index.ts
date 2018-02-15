@@ -1,4 +1,5 @@
 import got from "got"
+import { queue } from "d3-queue"
 
 const config = require("./build/config.json")
 
@@ -14,8 +15,7 @@ const request = (path: string) => got(config.gitlab.api + path, {
 // run(async () => {
 //   const path = "/v4/projects?per_page=100"
 //   const response = await request(path)
-//   console.log(response.statusCode)
-//   console.log(response.statusMessage)
+//   console.log(response.statusCode, response.statusMessage)
 
 //   const projects: any[] = JSON.parse(response.body)
 //   projects.forEach(project => {
@@ -26,8 +26,7 @@ const request = (path: string) => got(config.gitlab.api + path, {
 run(async () => {
   const path = "/v4/projects/" + config.gitlab.project + "/merge_requests?state=opened&per_page=100"
   const response = await request(path)
-  // console.log(response.statusCode)
-  // console.log(response.statusMessage)
+  console.log(response.statusCode, response.statusMessage)
 
   const mergeRequests: any[] = JSON.parse(response.body)
   const ids: number[] = []
@@ -37,13 +36,13 @@ run(async () => {
     ids.push(mergeRequest.iid)
   })
 
+  const q = queue()
   const results: any = []
   ids.forEach(id => {
-    run(async () => {
-      const path = "/v4/projects/" + config.gitlab.project + "/merge_requests/" + id + "/changes"
+    q.defer(async done => {
+      const path = "/v4/projects/" + config.gitlab.project + "/merge_requests/" + id + "/changes?per_page=100"
       const response = await request(path)
-      // console.log(response.statusCode)
-      // console.log(response.statusMessage)
+      console.log(response.statusCode, response.statusMessage)
 
       const mergeRequest: any = JSON.parse(response.body)
       results.push({
@@ -53,12 +52,13 @@ run(async () => {
         files: mergeRequest.changes.map((it: any) => it.new_path).length,
         update: mergeRequest.updated_at
       })
+      done(null)
     })
   })
 
-  setTimeout(() => {
+  q.await(() => {
     console.log(results)
-  }, 2500)
+  })
 })
 
 // http://gitlab.example.com/users/auth/gitlab/callback

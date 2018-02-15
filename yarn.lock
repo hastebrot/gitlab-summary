@@ -6,6 +6,10 @@
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.7.0.tgz#9a06f4f137ee84d7df0460c1fdb1135ffa6c50fd"
 
+"@types/d3-queue@^3.0.5":
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/@types/d3-queue/-/d3-queue-3.0.5.tgz#3e4cbe2aff61db6a0b2b8c4800299e4ec6acc850"
+
 "@types/got@^7.1.7":
   version "7.1.7"
   resolved "https://registry.yarnpkg.com/@types/got/-/got-7.1.7.tgz#fd8053a4e7f3e7d37f2aed6ea24f5f19ec4bda76"
@@ -37,6 +41,10 @@ clone-response@1.0.2:
 core-util-is@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
+
+d3-queue@^3.0.7:
+  version "3.0.7"
+  resolved "https://registry.yarnpkg.com/d3-queue/-/d3-queue-3.0.7.tgz#c93a2e54b417c0959129d7d73f6cf7d4292e7618"
 
 decode-uri-component@^0.2.0:
   version "0.2.0"
