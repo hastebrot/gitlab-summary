@@ -16,11 +16,15 @@ if (require.main === module) {
       $ lab projects foo
       $ lab reviews foo
       $ lab reviews foo --files
+      $ lab reviews foo --alarms
   `
 
   const cli = meow(help, {
     flags: {
       files: {
+        type: "boolean"
+      },
+      alarms: {
         type: "boolean"
       }
     }
@@ -37,7 +41,7 @@ if (require.main === module) {
       fetchProjectList(config, cli.input[1])
     }
     else if (cli.input[0] === "reviews") {
-      fetchMergeRequestList(config, cli.input[1], cli.flags.files)
+      fetchMergeRequestList(config, cli.input[1], cli.flags.files, cli.flags.alarms)
     }
   }
 }
@@ -54,7 +58,7 @@ export function fetchProjectList(config: any, projectName: string) {
     const projects: any[] = JSON.parse(response.body)
     projects.forEach(project => {
       console.log([
-        chalk.underline(project.id), chalk.red(project.name),
+        chalk.underline(project.id), chalk.cyan(project.name),
         project.path_with_namespace
       ].join(" "))
     })
@@ -63,8 +67,8 @@ export function fetchProjectList(config: any, projectName: string) {
 }
 
 export function fetchMergeRequestList(config: any, projectName: string,
-    showFiles: boolean = false) {
-  const extensionsGlob = "**/*.{java,js,html,gradle}"
+    showFiles: boolean = false, showAlarms: boolean = false) {
+  const extensionsGlob = "**/*.{java,js,htm,html,gradle}"
 
   run(async () => {
     const path = pathsProject(projectName || config.gitlab.project)
@@ -76,7 +80,7 @@ export function fetchMergeRequestList(config: any, projectName: string,
     if (projects.length > 0) {
       const project = projects[0]
       console.log([
-        chalk.underline(project.id), chalk.red(project.name),
+        chalk.underline(project.id), chalk.cyan(project.name),
         project.path_with_namespace, chalk.yellow(extensionsGlob)
       ].join(" "))
       console.log("")
@@ -143,10 +147,24 @@ export function fetchMergeRequestList(config: any, projectName: string,
               + `${Math.round(updatedDiff.minutes as number)} mins ago`
 
             console.log([
-              chalk.underline(result.id), chalk.redBright(result.title),
+              chalk.underline(result.id), chalk.cyan(result.title),
               result.author, `[${result.files.length}]`, chalk.yellow(updatedDiffStr)
             ].join(" "))
             console.log("")
+
+            if (showAlarms) {
+              const alarms = config.alarms || {}
+              Object.keys(alarms).forEach(message => {
+                const paths = result.files.map((file: any) => file.path)
+                const globs = alarms[message]
+                const match = micromatch(paths, globs)
+                if (match.length > 0) {
+                  console.log(`${chalk.dim(chalk.yellow("(" + match.length + ")"))} `
+                    + `${chalk.dim(message)}`)
+                }
+              })
+              console.log("")
+            }
 
             if (showFiles) {
               result.files
@@ -161,7 +179,6 @@ export function fetchMergeRequestList(config: any, projectName: string,
           })
         })
       })
-
     }
   })
 }
