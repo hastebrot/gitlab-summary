@@ -127,7 +127,9 @@ export function fetchMergeRequestList(config: any, projectName: string,
                 }
               }),
               created: DateTime.fromISO(mergeRequest.created_at),
-              updated: DateTime.fromISO(mergeRequest.updated_at)
+              updated: DateTime.fromISO(mergeRequest.updated_at),
+              upvotes: mergeRequest.upvotes,
+              downvotes: mergeRequest.downvotes
             })
             done(null)
           })
@@ -147,8 +149,10 @@ export function fetchMergeRequestList(config: any, projectName: string,
               + `${Math.round(updatedDiff.minutes as number)} mins ago`
 
             console.log([
-              chalk.underline(result.id), chalk.cyan(result.title),
-              result.author, `[${result.files.length}]`, chalk.yellow(updatedDiffStr)
+              chalk.underline(result.id),
+              `${chalk.green("+" + result.upvotes)} ${chalk.red("-" + result.downvotes)}`,
+              chalk.cyan(result.title), result.author,
+              `(${result.files.length + " files"})`, chalk.yellow(updatedDiffStr)
             ].join(" "))
             console.log("")
 
