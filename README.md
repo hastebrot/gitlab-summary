@@ -1,6 +1,6 @@
 ## gitlab-summary
 
-> lists open merge request of gitlab projects.
+> Lists open merge request of gitlab projects.
 
 ~~~
   Usage
@@ -19,6 +19,12 @@ Configure the GitLab server and your access token in `build/config.json`:
   "gitlab": {
     "api": "https://gitlab.example.com/api",
     "token": "a1b2c3d4e5"
+  },
+  "alarms": {
+    "gradle files were changed": ["**/*.gradle"],
+    "html files were changed": ["**/*.{htm,html}"],
+    "java files were changed": ["**/*.java"],
+    "js files were changed": ["**/*.js"]
   }
 }
 ~~~
