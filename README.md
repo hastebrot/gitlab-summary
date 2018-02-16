@@ -10,6 +10,8 @@
     $ lab projects
     $ lab projects foo
     $ lab reviews foo
+    $ lab reviews foo --files
+    $ lab reviews foo --alarms
 ~~~
 
 Configure the GitLab server and your access token in `build/config.json`:
