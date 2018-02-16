@@ -135,6 +135,16 @@ export function fetchMergeRequestList(config: any, projectName: string,
           })
         })
 
+        function formatTimeDiff(now: DateTime, time: DateTime): string {
+            const diff = now.diff(time, ["days", "hours", "minutes"])
+              .toObject()
+            const diffUnits: string[] = []
+            if (diff.days) { diffUnits.push(`${diff.days} days`) }
+            if (diff.hours) { diffUnits.push(`${diff.hours} hours`) }
+            if (diff.minutes) { diffUnits.push(`${Math.floor(diff.minutes)} mins`) }
+            return `${diffUnits.join(", ")} ago`
+        }
+
         q.await(() => {
           const now = DateTime.local()
 
@@ -143,16 +153,13 @@ export function fetchMergeRequestList(config: any, projectName: string,
           })
 
           results.forEach((result: any) => {
-            const updatedDiff = now.diff(result.updated, ["hours", "minutes"])
-              .toObject()
-            const updatedDiffStr = `${updatedDiff.hours} hours, `
-              + `${Math.round(updatedDiff.minutes as number)} mins ago`
+            const updatedDiff = formatTimeDiff(now, result.updated)
 
             console.log([
               chalk.underline(result.id),
               `${chalk.green("+" + result.upvotes)} ${chalk.red("-" + result.downvotes)}`,
               chalk.cyan(result.title), result.author,
-              `(${result.files.length + " files"})`, chalk.yellow(updatedDiffStr)
+              `(${result.files.length + " files"})`, chalk.yellow(updatedDiff)
             ].join(" "))
             console.log("")
 
