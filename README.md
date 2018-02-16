@@ -1,6 +1,6 @@
 ## gitlab-summary
 
-> Lists open merge request of gitlab projects.
+> Lists open merge requests of GitLab projects.
 
 ~~~
   Usage
